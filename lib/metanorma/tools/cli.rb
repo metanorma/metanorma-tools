@@ -20,7 +20,6 @@ module Metanorma
       option :prefix, type: :string, aliases: '-p', desc: 'Prefix for generated figure filenames'
       option :zip, type: :boolean, default: false, desc: 'Create a ZIP archive of extracted figures'
       option :verbose, type: :boolean, default: false, aliases: '-v', desc: 'Show detailed progress information'
-      option :auto_prefix, type: :boolean, default: true, desc: 'Automatically generate prefix from document metadata'
       option :retain_original_filenames, type: :boolean, default: false, desc: 'For ISO documents, retain original filenames in generated names'
 
       def extract_images(input_xml)

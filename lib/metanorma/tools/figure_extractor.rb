@@ -28,8 +28,7 @@ module Metanorma
         normalized_options = options.transform_keys(&:to_sym)
         @options = {
           zip: false,
-          verbose: false,
-          auto_prefix: true
+          verbose: false
         }.merge(normalized_options)
       end
 
@@ -74,7 +73,7 @@ module Metanorma
       end
 
       def determine_prefix(prefix, metadata)
-        if options[:auto_prefix] && prefix.nil? && metadata
+        if prefix.nil? && metadata
           prefix = metadata.auto_prefix
           puts "Auto-generated prefix: #{prefix}"
         end

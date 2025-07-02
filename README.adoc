@@ -61,9 +61,6 @@ metanorma-tools extract-images document.presentation.xml --zip
 # Verbose mode for debugging
 metanorma-tools extract-images document.presentation.xml --verbose
 
-# Disable automatic prefix generation
-metanorma-tools extract-images document.presentation.xml --prefix custom_prefix --no-auto-prefix
-
 # Retain original filenames for ISO documents
 metanorma-tools extract-images document.presentation.xml --retain-original-filenames
 
@@ -74,15 +71,14 @@ metanorma-tools extract-images document.presentation.xml --output-dir iso-19135-
 ==== Command line options
 
 * `--output-dir` / `-o`: Directory where extracted figures will be saved
-* `--prefix` / `-p`: Custom prefix for generated figure filenames
+* `--prefix` / `-p`: Custom prefix for generated figure filenames (when not provided, automatically generates from document metadata)
 * `--zip`: Create a ZIP archive of all extracted figures
 * `--verbose` / `-v`: Show detailed progress information and warnings
-* `--auto-prefix` / `--no-auto-prefix`: Enable/disable automatic prefix generation from document metadata (default: enabled)
 * `--retain-original-filenames`: For ISO documents, retain original filenames in generated names (default: disabled)
 
 ==== Automatic metadata extraction
 
-When `--auto-prefix` is enabled (default), the tool extracts document metadata from the XML header:
+The tool automatically extracts document metadata from the XML header:
 
 * *Standard Number*: From `<docnumber>` element
 * *Edition*: From `<edition>` element
@@ -103,463 +99,7 @@ When `--auto-prefix` is enabled (default), the tool extracts document metadata f
 * *Progress Tracking*: Detailed extraction statistics and file size reporting
 * *Error Handling*: Robust error handling with verbose mode for debugging
 
-== ISO DRG compliance
-
-=== General
-
-The ISO DRG (Document Review Group) requirements for document processing are specified in the "DRG working instructions and directives" (August 2020), 3.1 "Revisable files".
-
-3.1 provides a quote on their guidelines for submission:
-
-[quote]
-____
-Guidelines for the submission of text and graphics to ISO/CS (2020)
-
-As a general rule, submitted graphic files (e.g. diagrams, technical drawings) need to be revisable and language neutral (with the exception of flowcharts and organigrams). All drawing elements within the graphics (lines, symbols, etc.) must be modifiable, allowing ISO/CS to adjust or change them when necessary during the editing process. All text elements must be editable, and not pixelized or outlined text. In addition, the revisable graphic files are made available to the ISO members for their publishing activities.
-
-To this end, please submit revisable (vector-drawn) files. ISO/CS is not responsible for redrafting graphics that are not revisable.
-
-ISO/CS recommends the formats listed below:
-
-* AutoCAD (.dwg or .dxf)
-* Illustrator (.ai)
-* Vector file type (.eps or .svg)
-* Word (.doc .docx), Excel (.xls .xlsx), Powerpoint (.ppt .pptx), Visio (.vsd .vsdx)
-* CorelDraw (.cdr)
-
-The following formats may be used only for images, pictures, etc. where there are no text elements:
-
-* .png, .tif, .jpeg
-____
-
-=== File naming convention
-
-The file naming requirements differ by document type.
-
-In 3.2 "File names" two file name patterns are given but they are not complete as these components are missing:
-
-* subfigure (described in the block image and examples);
-* key (described in the block image and examples);
-* language (described in the block image and examples);
-* development stages (not described).
-
-Here we provide a complete pattern for the ease of understanding and example listing.
-
-There are four parts of the full filename pattern:
-
-* document portion
-* in-document portion
-* language portion
-* file extension portion
-
-==== Document portion
-
-For Standard, TS, TR, PAS, IWA:
-
-[source]
-----
-{StandardNumber}[-{partNumber}]_ed{editionNumber}[_{stageCode}]
-----
-
-Where,
-
-* `StandardNumber` is the standard number, e.g. `12345`;
-* `partNumber` is the part number, e.g. `1`;
-* `stageCode` is the stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf` (final stage uses empty code);
-* `editionNumber` is the edition number, e.g. `1`.
-
-[example]
-====
-For the first edition of ISO 12345-1, the document portion is `12345-1_ed1`.
-====
-
-NOTE: TR/TS do not use the codes "FDIS" etc. TODO ask ISO/CS what the proper codes are.
-
-NOTE: The development stage is also provided.
-
-For Amendments / Corrigenda:
-
-[source]
-----
-{StandardNumber}-{partNumber}_ed{editionNumber}{supplementCode}{supplementNumber}[_{stageCode}]
-----
-
-Where,
-
-* `StandardNumber` is the standard number, e.g. `12345`;
-* `partNumber` is the part number, e.g. `1`;
-* `stageCode` is the stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf` (final stage uses empty code);
-* `editionNumber` is the edition number, e.g. `1`;
-* `supplementCode` is the supplement code. One of `amd`, `cor`;
-* `supplementNumber` is the supplement number, e.g. `1`;
-
-[example]
-====
-For the second amendment to the first edition of ISO 12345-2, the portion is `12345-2_ed1amd2`.
-
-For the second amendment at FDAM to the first edition of ISO 12345-2, the portion is `12345-2_ed1amd2_fdis`.
-====
-
-NOTE: Amendments do not use the codes "FDIS" etc. TODO ask ISO/CS what the proper codes are.
-
-NOTE: The development stage is also provided.
-
-==== In-document portion
-
-There are 4 types of in-document types:
-
-. figure and subfigure, where `subfigureAlphabet` is in lower alphabetic characters;
-+
-[source]
-----
-fig{figureNumber}[subfigureAlphabet][_{languageCode}]
-----
-+
-[example]
-====
-"Figure 3" is represented as `fig3`.
-
-Figure 3 in French is represented as `fig3_f`.
-
-"Figure 3 a)" is represented as `fig3a`.
-
-"Figure 3 a)" in French is represented as `fig3a_f`.
-
-"Figure A.2" is represented as `figA2`.
-====
-
-. table, where `tableNumber` is in lower alphabetic characters;
-+
-[source]
-----
-{figurePortion}Tab{tableNumber}
-----
-+
-[example]
-====
-"Table 3" is `figTab3`.
-
-Second figure in "Table 1": `figTab1b`. (TODO Is this unnumbered?)
-====
-
-. figure key, representing an individual key as legend to the figure;
-+
-[source]
-----
-{figurePortion}_key{keyNumber}
-----
-+
-[example]
-====
-Second key in "Figure 1": `fig1_key2`
-====
-
-. inline image in text, where `textNumber` is in lower alphabetic characters;
-+
-[source]
-----
-figText{textNumber}
-----
-+
-[example]
-====
-First graphical element inline with text: `figText1`
-
-Third graphical element inline with text: `figText3`
-====
-
-NOTE: There is also description of the "Special Layout" with such a pattern: "File for table 1 which does not have a figure number" is assigned the file name `SL12345-1_ed1figTab1.dwg`. Since I have no idea what the special layout is and is likely rare to encounter, it is omitted from this.
-
-==== Language portion
-
-Valid entries are:
-
-`_e`:: English, but it is no longer needed
-`_f`:: French
-`_r`:: Russian
-`_s`:: Spanish
-`_a`:: Arabic
-`_d`:: German
-
-==== File extension portion
-
-ISO/CS (pretty much) only accepts these files.
-
-Vector:
-
-* AutoCAD (`.dwg` or `.dxf`)
-* Illustrator (`.ai`)
-* Vector file type (`.eps` or `.svg`)
-* Word (`.doc`, `.docx`), Excel (`.xls`, `.xlsx`), Powerpoint (`.ppt`, `.pptx`), Visio (`.vsd`, `.vsdx`)
-* CorelDraw (`.cdr`)
-
-Raster (only useable when no text):
-
-* Portable Network Graphics (`.png`)
-* Tagged Image File Format (`.tif`)
-* Joint Photographic Experts Group (`.jpeg`)
-
-==== Examples
-
-The following examples are given by the source document.
-
-.File naming examples from ISO DRG Section 3.2
-[cols="1,2,3",options="header"]
-|===
-| Where used | Filename | Description
-
-| Normal figure
-| `12345-1_ed1fig1.dwg`
-| File for figure 1
-
-| Normal figure
-| `12345-1_ed1fig2.dwg`
-| File for figure 2
-
-| Normal figure, subfigure
-| `12345-1_ed1fig1a.dwg`
-| File for figure 1, subfigure a
-
-| Normal figure, subfigure
-| `12345-1_ed1fig1b.dwg`
-| File for figure 1, subfigure b
-
-| Normal figure, key file
-| `12345-1_ed1fig1_key1.dwg`
-| File for figure 1, first key file
-
-| Normal figure, key file
-| `12345-1_ed1fig1_key2.dwg`
-| File for figure 1, second key file
-
-| Table
-| `12345-1_ed1figTab1.dwg`
-| File for the single figure in Table 1
-
-| Table
-| `12345-1_ed1figTab1a.dwg`
-| File for the first figure in Table 1
-
-| Table
-| `12345-1_ed1figTab1b.dwg`
-| File for the second figure in Table 1
-
-| Annex
-| `12345-1_ed1figA1.dwg`
-| File for the first figure in appendix A
-
-| Annex
-| `12345-1_ed1figA2.dwg`
-| File for the second figure in appendix A
-
-| Annex
-| `12345-1_ed1figA1a.dwg`
-| File for first figure in appendix A, subfigure a
-
-| Annex
-| `12345-1_ed1figA1b.dwg`
-| File for first figure in appendix A, subfigure b
-
-| Language
-| `12345-1_ed1fig1_f.dwg`
-| File for figure 1, French translation
-
-| Amendment
-| `12345-1_ed1amd1fig1.dwg`
-| File for figure 1 of amendment 1
-
-| Inline
-| `12345-1_ed1figText1.dwg`
-| File for graphical element inline with text
-
-| Special Layout
-| `SL12345-1_ed1figTab1.dwg`
-| File for table 1 which does not have a figure
-|===
-
-=== Data structure
-
-The data structure is designed to be MECE (Mutually Exclusive, Collectively Exhaustive) and covers all ISO DRG filename patterns.
-
-==== Core Schema
-
-[source,yaml]
-----
-# Document identification (required)
-standard_number: 12345        # ISO standard number
-part_number: 1                # optional, part number
-edition_number: 2             # edition number
-
-# Development stage (optional)
-stage_code: "fdis"            # pwi|np|awi|wd|cd|dis|fdis|prf or empty for final
-
-# Supplement information (for amendments/corrigenda only)
-supplement_type: "amd"        # amd|cor (optional)
-supplement_number: 1          # required if supplement_type present
-
-# Content type (required - mutually exclusive)
-content_type: "figure"        # figure|table|key|text|special_layout
-
-# Content-specific fields (conditional based on content_type)
-figure_number: "3"            # required for figure|table|key types
-subfigure: "a"                # optional, single lowercase letter (figure only)
-table_number: "1"             # used for table content_type
-key_number: 2                 # required for key content_type
-text_number: 1                # required for text content_type
-
-# Localization (optional)
-language_code: "f"            # e|f|r|s|a|d (empty for English)
-
-# Output format (required)
-file_extension: "svg"         # svg|dwg|ai|eps|png|tif|jpeg|etc.
-----
-
-==== Field Validation Rules
-
-* `standard_number`: Required integer
-* `part_number`: Optional integer
-* `edition_number`: Required integer
-* `stage_code`: Optional string, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf`, or empty for final stage
-* `supplement_type`: Optional string, one of: `amd`, `cor`
-* `supplement_number`: Required integer if `supplement_type` is present
-* `content_type`: Required string, one of: `figure`, `table`, `key`, `text`, `special_layout`
-* `figure_number`: Required for `figure`, `table`, `key` content types. Format: number or letter+number (e.g., "3", "A.2")
-* `subfigure`: Optional single lowercase letter (a-z), only valid for `figure` content type
-* `table_number`: Used for `table` content type, typically same as `figure_number`
-* `key_number`: Required integer for `key` content type
-* `text_number`: Required integer for `text` content type
-* `language_code`: Optional string, one of: `e`, `f`, `r`, `s`, `a`, `d`
-* `file_extension`: Required string
-
-==== Content Type Examples
-
-.Standard figure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "figure"
-figure_number: "3"
-file_extension: "svg"
-# Generates: 12345-1_ed2fig3.svg
-----
-
-.Figure with subfigure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "figure"
-figure_number: "3"
-subfigure: "a"
-file_extension: "svg"
-# Generates: 12345-1_ed2fig3a.svg
-----
-
-.Table figure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "table"
-figure_number: "1"
-table_number: "1"
-file_extension: "svg"
-# Generates: 12345-1_ed2figTab1.svg
-----
-
-.Figure key
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "key"
-figure_number: "1"
-key_number: 2
-file_extension: "svg"
-# Generates: 12345-1_ed2fig1_key2.svg
-----
-
-.Inline text graphic
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "text"
-text_number: 1
-file_extension: "svg"
-# Generates: 12345-1_ed2figText1.svg
-----
-
-.Amendment figure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-supplement_type: "amd"
-supplement_number: 1
-content_type: "figure"
-figure_number: "3"
-file_extension: "svg"
-# Generates: 12345-1_ed2amd1fig3.svg
-----
-
-.Figure with language
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "figure"
-figure_number: "3"
-language_code: "f"
-file_extension: "svg"
-# Generates: 12345-1_ed2fig3_f.svg
-----
-
-.Annex figure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "figure"
-figure_number: "A.2"
-file_extension: "svg"
-# Generates: 12345-1_ed2figA2.svg
-----
-
-.Development stage figure
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-stage_code: "fdis"
-content_type: "figure"
-figure_number: "3"
-file_extension: "svg"
-# Generates: 12345-1_fdis_ed2fig3.svg
-----
-
-.Special layout
-[source,yaml]
-----
-standard_number: 12345
-part_number: 1
-edition_number: 2
-content_type: "special_layout"
-figure_number: "1"
-table_number: "1"
-file_extension: "dwg"
-# Generates: SL12345-1_ed2figTab1.dwg
-----
+include::iso-drg-filename-guidance.adoc[leveloffset=+1]
 
 === File naming compliance (DRG Section 3.2)
 
@@ -583,6 +123,26 @@ The tool automatically extracts essential document information required for DRG 
 * *Edition information*: From `<edition>` element
 * *Stage and substage codes*: From document status elements
 * *Automatic prefix generation*: Creates standardized prefixes following ISO conventions
+
+=== Original filename preservation
+
+When the `--retain-original-filenames` option is used with ISO documents, the tool preserves original filenames from the XML document in the generated figure filenames. This feature:
+
+* Only applies to ISO documents (when `metadata.flavor == 'iso'`)
+* Extracts original filenames from the `filename` attribute of image elements
+* Incorporates them into the generated filenames using the pattern: `{iso_drg_pattern}_{original_filename}.{extension}`
+* Maintains traceability between extracted figures and source documents
+
+[example]
+====
+Without `--retain-original-filenames`:
+- `17301_dis_ed3figA1.png`
+- `17301_dis_ed3figC1.png`
+
+With `--retain-original-filenames`:
+- `17301_dis_ed3figA1_a1.png` (includes `a1` from original `images/a1.png`)
+- `17301_dis_ed3figC1_b1.png` (includes `b1` from original `images/b1.png`)
+====
 
 == Output format
 
@@ -735,6 +295,12 @@ The main extraction engine that processes Metanorma XML files.
 === IsoGraphicFilename
 
 Utility class for generating ISO DRG compliant filenames (future enhancement).
+
+== Development notes
+
+The `spec/fixtures/document-en.dis.presentation.xml` file contains sample
+Metanorma XML for testing purposes from the mn-samples-iso repository.
+
 
 == Copyright
 
