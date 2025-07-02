@@ -2,6 +2,7 @@
 
 require 'base64'
 require 'fileutils'
+require_relative 'iso_graphic_filename'
 
 module Metanorma
   module Tools
@@ -25,10 +26,10 @@ module Metanorma
         @file_size = calculate_size
       end
 
-      def to_file(output_dir, prefix)
+      def to_file(output_dir, prefix, document_metadata = nil, retain_original_filenames = false)
         FileUtils.mkdir_p(output_dir)
 
-        filename = generate_filename(prefix)
+        filename = generate_filename(prefix, document_metadata, retain_original_filenames)
         filepath = File.join(output_dir, filename)
 
         write_content(filepath)
@@ -71,19 +72,51 @@ module Metanorma
         end
       end
 
-      def generate_filename(prefix)
+      def generate_filename(prefix, document_metadata = nil, retain_original_filenames = false)
         format_info = FORMATS[@format]
         extension = format_info ? format_info[:ext] : 'unknown'
 
-        # Sanitize autonum for filename (remove dots for ISO DRG compliance)
-        sanitized_autonum = @autonum.gsub('.', '')
+        # If we have document metadata, use proper ISO DRG filename generation
+        if document_metadata
+          # Parse subfigure from autonum (e.g., "C.2 a" -> figure: "C.2", subfigure: "a")
+          figure_number, subfigure = parse_figure_number(@autonum)
 
-        # ISO DRG format: {document_portion}_fig{figureNumber}.{extension}
+          # Only include original filename if retain_original_filenames is true and we have an original filename
+          original_filename_to_use = (retain_original_filenames && @original_filename && !@original_filename.empty?) ? @original_filename : nil
+
+          iso_filename = IsoGraphicFilename.new(
+            standard_number: document_metadata.standard_number&.to_i,
+            part_number: document_metadata.part_number&.to_i,
+            edition_number: document_metadata.edition&.to_i,
+            stage_code: document_metadata.stage_code,
+            content_type: 'figure',
+            figure_number: figure_number,
+            subfigure: subfigure,
+            file_extension: extension,
+            original_filename: original_filename_to_use
+          )
+
+          return iso_filename.generate_filename
+        end
+
+        # Fallback to simple prefix-based naming
+        sanitized_autonum = @autonum.gsub('.', '')
         if @original_filename && !@original_filename.empty?
           basename = File.basename(@original_filename, File.extname(@original_filename))
-          "#{prefix}_fig#{sanitized_autonum}_#{basename}.#{extension}"
+          "#{prefix}fig#{sanitized_autonum}_#{basename}.#{extension}"
         else
-          "#{prefix}_fig#{sanitized_autonum}.#{extension}"
+          "#{prefix}fig#{sanitized_autonum}.#{extension}"
+        end
+      end
+
+      def parse_figure_number(autonum)
+        # Handle cases like "C.2 a", "A.1", "3", etc.
+        if autonum.match(/^(.+?)\s+([a-z])$/)
+          # Has subfigure: "C.2 a" -> ["C.2", "a"]
+          [$1, $2]
+        else
+          # No subfigure: "C.2" -> ["C.2", nil]
+          [autonum, nil]
         end
       end
     end

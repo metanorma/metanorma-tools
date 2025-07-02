@@ -64,8 +64,11 @@ metanorma-tools extract-images document.presentation.xml --verbose
 # Disable automatic prefix generation
 metanorma-tools extract-images document.presentation.xml --prefix custom_prefix --no-auto-prefix
 
+# Retain original filenames for ISO documents
+metanorma-tools extract-images document.presentation.xml --retain-original-filenames
+
 # Combined options
-metanorma-tools extract-images document.presentation.xml --output-dir iso-19135-figures --prefix iso_19135_fdis_fig --zip --verbose
+metanorma-tools extract-images document.presentation.xml --output-dir iso-19135-figures --prefix iso_19135_fdis_fig --zip --verbose --retain-original-filenames
 ----
 
 ==== Command line options
@@ -75,6 +78,7 @@ metanorma-tools extract-images document.presentation.xml --output-dir iso-19135-
 * `--zip`: Create a ZIP archive of all extracted figures
 * `--verbose` / `-v`: Show detailed progress information and warnings
 * `--auto-prefix` / `--no-auto-prefix`: Enable/disable automatic prefix generation from document metadata (default: enabled)
+* `--retain-original-filenames`: For ISO documents, retain original filenames in generated names (default: disabled)
 
 ==== Automatic metadata extraction
 

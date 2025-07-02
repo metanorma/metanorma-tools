@@ -1,31 +1,39 @@
 # frozen_string_literal: true
 
+require 'lutaml/model'
+
 module Metanorma
   module Tools
-    class DocumentMetadata
-      attr_reader :standard_number, :edition, :stage_code, :stage_abbreviation
-
-      def initialize(standard_number, edition, stage_code, stage_abbreviation, flavor = 'generic')
-        @standard_number = standard_number
-        @edition = edition
-        @stage_code = stage_code
-        @stage_abbreviation = stage_abbreviation
-        @flavor = flavor
-      end
+    class DocumentMetadata < Lutaml::Model::Serializable
+      attribute :title, :string
+      attribute :docnumber, :string
+      attribute :stage, :string
+      attribute :substage, :string
+      attribute :docidentifier, :string
+      attribute :standard_number, :string
+      attribute :part_number, :string
+      attribute :edition, :string
+      attribute :stage_code, :string
+      attribute :stage_abbreviation, :string
+      attribute :flavor, :string, default: -> { 'iso' }
 
       def auto_prefix
-        case @flavor
+        case flavor
         when 'iso'
-          # ISO DRG format: {StandardNumber}_ed{editionNumber}_{stageCode}
-          "#{@standard_number}_ed#{@edition}_#{@stage_abbreviation.downcase}"
+          # ISO DRG format: {StandardNumber}_{stageCode}_ed{editionNumber}
+          "#{standard_number}_#{stage_abbreviation&.downcase}_ed#{edition}"
         else
           # For other flavors, use a generic pattern
-          "#{@flavor}_#{@standard_number}_ed#{@edition}_#{@stage_abbreviation.downcase}"
+          "#{flavor}_#{standard_number}_#{stage_abbreviation&.downcase}_ed#{edition}"
         end
       end
 
       def to_s
-        "ISO #{@standard_number} Edition #{@edition} Stage #{@stage_code} (#{@stage_abbreviation})"
+        if docidentifier
+          "#{docidentifier} - #{title}"
+        else
+          "ISO #{standard_number} Edition #{edition} Stage #{stage_code} (#{stage_abbreviation})"
+        end
       end
     end
   end

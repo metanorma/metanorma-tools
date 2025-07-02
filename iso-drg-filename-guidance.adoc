@@ -67,7 +67,7 @@ For Standard, TS, TR, PAS, IWA:
 
 [source]
 ----
-{StandardNumber}[-{partNumber}]_ed{editionNumber}[_{stageCode}]
+{StandardNumber}[-{partNumber}][_{stageCode}]_ed{editionNumber}
 ----
 
 Where,
@@ -92,7 +92,7 @@ For Amendments / Corrigenda:
 
 [source]
 ----
-{StandardNumber}-{partNumber}_ed{editionNumber}{supplementCode}{supplementNumber}[_{stageCode}]
+{StandardNumber}-{partNumber}[_{stageCode}]_ed{editionNumber}{supplementCode}{supplementNumber}
 ----
 
 Where,
@@ -200,6 +200,32 @@ Valid entries are:
 `_a`:: Arabic
 `_d`:: German
 
+
+== Original filename preservation
+
+When extracting figures from Metanorma documents, if the original image has a `filename` attribute, the ISO DRG pattern is extended to preserve the original filename:
+
+[source]
+----
+{isoDRGpattern}_{originalFilename}.{extension}
+----
+
+Where:
+* `isoDRGpattern` is the standard ISO DRG filename pattern as described above
+* `originalFilename` is the original filename (without extension) from the `filename` attribute
+* `extension` is the file extension
+
+[example]
+For Figure 1 with original filename "diagram-overview.png":
+`12345-1_ed1fig1_diagram-overview.png`
+
+For Figure A.2 subfigure a with original filename "flowchart.svg":
+`12345-1_ed1figA2a_flowchart.svg`
+
+This extended pattern ensures that:
+1. Files follow ISO DRG naming conventions for proper document management
+2. Original filenames are preserved for reference and traceability
+3. The relationship between extracted figures and source documents is maintained
 
 == File extension portion
 
@@ -482,6 +508,3 @@ table_number: "1"
 file_extension: "dwg"
 # Generates: SL12345-1_ed2figTab1.dwg
 ----
-
-
-

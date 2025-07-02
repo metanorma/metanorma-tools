@@ -47,9 +47,9 @@ module Metanorma
         figure_objects, format_counts, total_size = process_figures(figures)
 
         saved_files = if options[:zip]
-                        extract_to_zip(figure_objects, output_dir, prefix)
+                        extract_to_zip(figure_objects, output_dir, prefix, metadata)
                       else
-                        extract_to_directory(figure_objects, output_dir, prefix)
+                        extract_to_directory(figure_objects, output_dir, prefix, metadata)
                       end
 
         print_summary(metadata, prefix, figure_objects.length, format_counts, total_size, output_dir)
@@ -102,12 +102,13 @@ module Metanorma
         output_dir
       end
 
-      def extract_to_directory(figure_objects, output_dir, prefix)
+      def extract_to_directory(figure_objects, output_dir, prefix, metadata = nil)
         # Always extract to temporary directory first, then move to destination
         Dir.mktmpdir('metanorma_figures_') do |temp_dir|
           puts "\nExtracting #{figure_objects.length} figures to temporary directory: #{temp_dir}"
 
-          temp_files = figure_objects.map { |figure_obj| figure_obj.to_file(temp_dir, prefix) }
+          retain_original_filenames = should_retain_original_filenames?(metadata)
+          temp_files = figure_objects.map { |figure_obj| figure_obj.to_file(temp_dir, prefix, metadata, retain_original_filenames) }
 
           # Ensure output directory exists
           FileUtils.mkdir_p(output_dir)
@@ -127,7 +128,7 @@ module Metanorma
         end
       end
 
-      def extract_to_zip(figure_objects, output_dir, prefix)
+      def extract_to_zip(figure_objects, output_dir, prefix, metadata = nil)
         # Extract to temporary directory and create ZIP in output directory
         zip_filename = "#{prefix}.zip"
         FileUtils.mkdir_p(output_dir) if output_dir
@@ -136,7 +137,8 @@ module Metanorma
         Dir.mktmpdir('metanorma_figures_zip_') do |temp_dir|
           puts "\nExtracting #{figure_objects.length} figures to temporary directory for ZIP: #{temp_dir}"
 
-          temp_files = figure_objects.map { |figure_obj| figure_obj.to_file(temp_dir, prefix) }
+          retain_original_filenames = should_retain_original_filenames?(metadata)
+          temp_files = figure_objects.map { |figure_obj| figure_obj.to_file(temp_dir, prefix, metadata, retain_original_filenames) }
 
           puts "Creating ZIP archive: #{zip_filename}"
           Zip::File.open(zip_path, Zip::File::CREATE) do |zipfile|
@@ -287,21 +289,53 @@ module Metanorma
         bibdata = doc.xpath('//xmlns:bibdata', METANORMA_NS).first
         return nil unless bibdata
 
-        standard_number = xpath_text(bibdata, './/xmlns:docnumber')
-        edition = xpath_text(bibdata, './/xmlns:edition[@language=""]')
+        # Extract basic document information
+        title = xpath_text(bibdata, './/xmlns:title[@type="main"][@language=""]') ||
+                xpath_text(bibdata, './/xmlns:title[@type="main"]') ||
+                xpath_text(bibdata, './/xmlns:title')
+
+        docnumber = xpath_text(bibdata, './/xmlns:docnumber')
+
+        # Extract docidentifier
+        docidentifier = xpath_text(bibdata, './/xmlns:docidentifier[@type="ISO"]') ||
+                       xpath_text(bibdata, './/xmlns:docidentifier')
+
+        # Extract stage information
         stage_element = bibdata.xpath('.//xmlns:status/xmlns:stage[@language=""]', METANORMA_NS).first
+        stage = stage_element&.text&.strip
+        stage_abbreviation = stage_element&.[]('abbreviation')
 
-        return nil unless standard_number && edition && stage_element
+        substage = xpath_text(bibdata, './/xmlns:status/xmlns:substage')
 
-        stage_code = stage_element.text&.strip
-        stage_abbreviation = stage_element['abbreviation']
-        substage_code = xpath_text(bibdata, './/xmlns:status/xmlns:substage')
+        # Extract edition
+        edition = xpath_text(bibdata, './/xmlns:edition[@language=""]') ||
+                 xpath_text(bibdata, './/xmlns:edition')
 
-        full_stage_code = [stage_code, substage_code].compact.join('.')
+        # Parse part number from docnumber (e.g., "17301-1" -> part_number: "1")
+        standard_number = docnumber
+        part_number = nil
+        if docnumber&.include?('-')
+          parts = docnumber.split('-', 2)
+          standard_number = parts[0]
+          part_number = parts[1]
+        end
 
-        return unless standard_number && edition && full_stage_code && stage_abbreviation
+        # Create stage code from stage abbreviation
+        stage_code = stage_abbreviation&.downcase
 
-        DocumentMetadata.new(standard_number, edition, full_stage_code, stage_abbreviation, flavor)
+        DocumentMetadata.new(
+          title: title,
+          docnumber: docnumber,
+          stage: stage,
+          substage: substage,
+          docidentifier: docidentifier,
+          standard_number: standard_number,
+          part_number: part_number,
+          edition: edition,
+          stage_code: stage_code,
+          stage_abbreviation: stage_abbreviation,
+          flavor: flavor
+        )
       end
 
       def xpath_text(element, xpath)
@@ -327,6 +361,11 @@ module Metanorma
         }
       rescue StandardError
         nil
+      end
+
+      def should_retain_original_filenames?(metadata)
+        # Only apply retain_original_filenames option for ISO documents
+        options[:retain_original_filenames] && metadata&.flavor&.downcase == 'iso'
       end
 
       def format_bytes(bytes)

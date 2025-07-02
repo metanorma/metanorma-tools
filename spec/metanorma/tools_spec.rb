@@ -5,7 +5,11 @@ RSpec.describe Metanorma::Tools do
     expect(Metanorma::Tools::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "loads all required classes" do
+    expect(Metanorma::Tools::FigureExtractor).to be_a(Class)
+    expect(Metanorma::Tools::Figure).to be_a(Class)
+    expect(Metanorma::Tools::DocumentMetadata).to be_a(Class)
+    expect(Metanorma::Tools::IsoGraphicFilename).to be_a(Class)
+    expect(Metanorma::Tools::Cli).to be_a(Class)
   end
 end

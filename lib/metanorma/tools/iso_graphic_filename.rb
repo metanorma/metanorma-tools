@@ -1,163 +1,106 @@
 # frozen_string_literal: true
 
+require 'lutaml/model'
+
 module Metanorma
   module Tools
-    class IsoGraphicFilename
+    class IsoGraphicFilename < Lutaml::Model::Serializable
       VALID_STAGE_CODES = %w[pwi np awi wd cd dis fdis prf].freeze
       VALID_SUPPLEMENT_TYPES = %w[amd cor].freeze
       VALID_CONTENT_TYPES = %w[figure table key text special_layout].freeze
       VALID_LANGUAGE_CODES = %w[e f r s a d].freeze
 
-      attr_reader :standard_number, :part_number, :edition_number, :stage_code,
-                  :supplement_type, :supplement_number, :content_type,
-                  :figure_number, :subfigure, :table_number, :key_number, :text_number,
-                  :language_code, :file_extension
+      attribute :standard_number, :integer
+      attribute :part_number, :integer
+      attribute :edition_number, :integer
+      attribute :stage_code, :string, values: VALID_STAGE_CODES
+      attribute :supplement_type, :string, values: VALID_SUPPLEMENT_TYPES
+      attribute :supplement_number, :integer
+      attribute :content_type, :string, values: VALID_CONTENT_TYPES
+      attribute :figure_number, :string
+      attribute :subfigure, :string
+      attribute :table_number, :string
+      attribute :key_number, :integer
+      attribute :text_number, :integer
+      attribute :language_code, :string, values: VALID_LANGUAGE_CODES
+      attribute :file_extension, :string
+      attribute :original_filename, :string
 
-      def initialize(data)
-        @data = data.is_a?(Hash) ? data : {}
-        parse_and_validate_data
+      key_value do
+        map 'standard_number', to: :standard_number
+        map 'part_number', to: :part_number
+        map 'edition_number', to: :edition_number
+        map 'stage_code', to: :stage_code
+        map 'supplement_type', to: :supplement_type
+        map 'supplement_number', to: :supplement_number
+        map 'content_type', to: :content_type
+        map 'figure_number', to: :figure_number
+        map 'subfigure', to: :subfigure
+        map 'table_number', to: :table_number
+        map 'key_number', to: :key_number
+        map 'text_number', to: :text_number
+        map 'language_code', to: :language_code
+        map 'file_extension', to: :file_extension
+        map 'original_filename', to: :original_filename
       end
 
       def generate_filename
-        validate!
-
         document_portion = build_document_portion
         content_portion = build_content_portion
         language_portion = build_language_portion
+        original_portion = build_original_filename_portion
 
-        filename_parts = [document_portion, content_portion, language_portion].compact
+        filename_parts = [document_portion, content_portion, language_portion, original_portion].compact
         filename = filename_parts.join('')
 
-        "#{filename}.#{@file_extension}"
+        "#{filename}.#{file_extension}"
       end
 
-      def validate!
-        errors = []
-
-        # Required fields
-        errors << 'standard_number is required' unless @standard_number
-        errors << 'edition_number is required' unless @edition_number
-        errors << 'content_type is required' unless @content_type
-        errors << 'file_extension is required' unless @file_extension
-
-        # Valid enums
-        if @stage_code && !VALID_STAGE_CODES.include?(@stage_code)
-          errors << "stage_code must be one of: #{VALID_STAGE_CODES.join(', ')}"
-        end
-
-        if @supplement_type && !VALID_SUPPLEMENT_TYPES.include?(@supplement_type)
-          errors << "supplement_type must be one of: #{VALID_SUPPLEMENT_TYPES.join(', ')}"
-        end
-
-        if @content_type && !VALID_CONTENT_TYPES.include?(@content_type)
-          errors << "content_type must be one of: #{VALID_CONTENT_TYPES.join(', ')}"
-        end
-
-        if @language_code && !VALID_LANGUAGE_CODES.include?(@language_code)
-          errors << "language_code must be one of: #{VALID_LANGUAGE_CODES.join(', ')}"
-        end
-
-        # Conditional requirements
-        if @supplement_type && !@supplement_number
-          errors << 'supplement_number is required when supplement_type is specified'
-        end
-
-        if @supplement_number && !@supplement_type
-          errors << 'supplement_type is required when supplement_number is specified'
-        end
-
-        # Content type specific validations
-        case @content_type
-        when 'figure', 'table', 'key'
-          errors << "figure_number is required for #{@content_type} content_type" unless @figure_number
-        when 'text'
-          errors << 'text_number is required for text content_type' unless @text_number
-        end
-
-        errors << 'key_number is required for key content_type' if @content_type == 'key' && !@key_number
-
-        errors << 'subfigure is only valid for figure content_type' if @subfigure && @content_type != 'figure'
-
-        if @subfigure && (@subfigure.length != 1 || !@subfigure.match?(/[a-z]/))
-          errors << 'subfigure must be a single lowercase letter'
-        end
-
-        raise ArgumentError, "Validation errors: #{errors.join('; ')}" unless errors.empty?
-      end
-
-      def to_h
-        {
-          standard_number: @standard_number,
-          part_number: @part_number,
-          edition_number: @edition_number,
-          stage_code: @stage_code,
-          supplement_type: @supplement_type,
-          supplement_number: @supplement_number,
-          content_type: @content_type,
-          figure_number: @figure_number,
-          subfigure: @subfigure,
-          table_number: @table_number,
-          key_number: @key_number,
-          text_number: @text_number,
-          language_code: @language_code,
-          file_extension: @file_extension
-        }.compact
+      def to_s
+        generate_filename
       end
 
       def inspect
-        "#<IsoGraphicFilename #{to_h}>"
+        attrs = {
+          standard_number: standard_number,
+          part_number: part_number,
+          edition_number: edition_number,
+          stage_code: stage_code,
+          supplement_type: supplement_type,
+          supplement_number: supplement_number,
+          content_type: content_type,
+          figure_number: figure_number,
+          subfigure: subfigure,
+          table_number: table_number,
+          key_number: key_number,
+          text_number: text_number,
+          language_code: language_code,
+          file_extension: file_extension
+        }.compact
+        "#<IsoGraphicFilename #{attrs}>"
       end
 
       private
 
-      def parse_and_validate_data
-        @standard_number = parse_integer(@data['standard_number'] || @data[:standard_number])
-        @part_number = parse_integer(@data['part_number'] || @data[:part_number])
-        @edition_number = parse_integer(@data['edition_number'] || @data[:edition_number])
-        @stage_code = parse_string(@data['stage_code'] || @data[:stage_code])
-        @supplement_type = parse_string(@data['supplement_type'] || @data[:supplement_type])
-        @supplement_number = parse_integer(@data['supplement_number'] || @data[:supplement_number])
-        @content_type = parse_string(@data['content_type'] || @data[:content_type])
-        @figure_number = parse_string(@data['figure_number'] || @data[:figure_number])
-        @subfigure = parse_string(@data['subfigure'] || @data[:subfigure])
-        @table_number = parse_string(@data['table_number'] || @data[:table_number])
-        @key_number = parse_integer(@data['key_number'] || @data[:key_number])
-        @text_number = parse_integer(@data['text_number'] || @data[:text_number])
-        @language_code = parse_string(@data['language_code'] || @data[:language_code])
-        @file_extension = parse_string(@data['file_extension'] || @data[:file_extension])
-      end
-
-      def parse_integer(value)
-        return nil if value.nil? || value == ''
-
-        value.is_a?(Integer) ? value : value.to_i
-      end
-
-      def parse_string(value)
-        return nil if value.nil? || value == ''
-
-        value.to_s.strip
-      end
-
       def build_document_portion
         # Handle special layout prefix
-        prefix = @content_type == 'special_layout' ? 'SL' : ''
+        prefix = content_type == 'special_layout' ? 'SL' : ''
 
         # Build standard number with optional part
-        doc_id = "#{prefix}#{@standard_number}"
-        doc_id += "-#{@part_number}" if @part_number
+        doc_id = "#{prefix}#{standard_number}"
+        doc_id += "-#{part_number}" if part_number
 
         # Add stage code if present (before edition for standards, after supplement for amendments)
-        if @supplement_type
+        if supplement_type
           # Amendment/Corrigenda pattern: {StandardNumber}-{partNumber}_ed{editionNumber}{supplementCode}{supplementNumber}[_{stageCode}]
-          doc_id += "_ed#{@edition_number}#{@supplement_type}#{@supplement_number}"
-          doc_id += "_#{@stage_code}" if @stage_code
+          doc_id += "_ed#{edition_number}#{supplement_type}#{supplement_number}"
+          doc_id += "_#{stage_code}" if stage_code
         else
           # Standard pattern: {StandardNumber}[-{partNumber}]_ed{editionNumber}[_{stageCode}]
-          doc_id += if @stage_code
-                      "_#{@stage_code}_ed#{@edition_number}"
+          doc_id += if stage_code
+                      "_#{stage_code}_ed#{edition_number}"
                     else
-                      "_ed#{@edition_number}"
+                      "_ed#{edition_number}"
                     end
         end
 
@@ -165,26 +108,34 @@ module Metanorma
       end
 
       def build_content_portion
-        case @content_type
+        case content_type
         when 'figure'
-          content = "fig#{normalize_figure_number(@figure_number)}"
-          content += @subfigure if @subfigure
+          content = "fig#{normalize_figure_number(figure_number)}"
+          content += subfigure if subfigure
           content
         when 'table'
-          "figTab#{normalize_figure_number(@table_number || @figure_number)}"
+          "figTab#{normalize_figure_number(table_number || figure_number)}"
         when 'key'
-          "fig#{normalize_figure_number(@figure_number)}_key#{@key_number}"
+          "fig#{normalize_figure_number(figure_number)}_key#{key_number}"
         when 'text'
-          "figText#{@text_number}"
+          "figText#{text_number}"
         when 'special_layout'
-          "figTab#{normalize_figure_number(@table_number || @figure_number)}"
+          "figTab#{normalize_figure_number(table_number || figure_number)}"
         else
-          raise ArgumentError, "Unknown content_type: #{@content_type}"
+          raise ArgumentError, "Unknown content_type: #{content_type}"
         end
       end
 
       def build_language_portion
-        @language_code ? "_#{@language_code}" : nil
+        language_code ? "_#{language_code}" : nil
+      end
+
+      def build_original_filename_portion
+        return nil unless original_filename && !original_filename.empty?
+
+        # Remove file extension from original filename if present
+        clean_filename = File.basename(original_filename, '.*')
+        "_#{clean_filename}"
       end
 
       def normalize_figure_number(figure_num)
