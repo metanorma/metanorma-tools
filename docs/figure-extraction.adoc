@@ -2,21 +2,25 @@
 
 == Overview
 
-=== General
+The figure extraction tool extracts embedded figures from Metanorma presentation
+XML files.
 
-The figure extraction tool extracts embedded figures from Metanorma
-presentation XML files with ISO DRG compliance features.
+The filenames are generated according to the extended
+link:docs/iso-drg-filename-guidance.adoc[ISO DRG guidelines].
 
-The figure extractor processes Metanorma presentation XML files to:
 
-* Extract embedded figures (SVG, PNG, JPEG, etc.)
-* Generate ISO DRG compliant filenames
-* Maintain document metadata and structure
-* Support various Metanorma flavors
+== How it works
+
+* The input Metanorma presentation XML file is parsed to identify embedded
+figures and obtain metadata needed for the naming.
+
+* Each figure is extracted and saved according to the specified output format
+and naming conventions.
+
 
 == Usage
 
-=== Basic extraction
+=== Command
 
 Extract figures from a Metanorma presentation XML file:
 
@@ -25,155 +29,81 @@ Extract figures from a Metanorma presentation XML file:
 metanorma-tools extract-images document.presentation.xml
 ----
 
-=== Options
-
-`-o, --output-dir DIR`::
-Output directory for extracted figures (default: current directory)
-
-`--prefix PREFIX`::
-Filename prefix for extracted figures
-
-`--format FORMAT`::
-Force specific output format (svg, png, jpeg)
-
-`--iso-drg`::
-Generate ISO DRG compliant filenames
-
-`--zip`::
-Create ZIP archive of extracted figures
-
-`--retain-original-filenames`::
-Keep original filenames from source document
-
-=== ISO DRG compliance
-
-When using the `--iso-drg` option, filenames are generated according to ISO
-Document Review Group guidelines:
-
-[example]
-====
-[source,bash]
-----
-metanorma-tools extract-images document.presentation.xml --iso-drg
-----
+When no options are provided, the files will be named according to ISO DRG guidelines.
 
 This generates filenames like:
 
-* `ISO_80000-2_2019_fig-1.svg`
-* `ISO_80000-2_2019_fig-2.png`
+* `19135-1_ed1fig1.svg`
+
+`-o, --output-dir DIR`::
+Output directory for extracted figures (default: under current directory). By
+default named using the "document portion" of the DRG filename pattern as the
+output directory name.
++
+[example]
+====
+`19135-1_ed1/{image_filenames}`
 ====
 
-=== Advanced usage
+`--prefix PREFIX`::
+Filename prefix for extracted figures
++
+[example]
+====
+`{prefix}_fig1.svg`
+====
 
-==== Extract with custom prefix
+`--zip`::
+Create ZIP archive of extracted figures. By default named using the "document
+portion" of the DRG filename pattern.
++
+[example]
+====
+`19135-1_ed1.zip`
+====
+
+`--retain-original-filenames`::
+Keep original filenames from source document. The Metanorma XML
+presentation format allows for embedded figures to retain their original
+filenames, which can be useful for versioning and tracking changes.
++
+[example]
+====
+`80000-2_ed2fig2_originalname.png`
+====
+
+
+
+A custom prefix can be specified to follow a specific naming convention (that is
+different from the ISO DRG style).
 
 [source,bash]
 ----
 metanorma-tools extract-images document.presentation.xml \
-  --prefix "ISO-80000-2" \
+  --prefix "my_prefix" \
   --output-dir figures
 ----
 
-==== Create submission package
+[example]
+====
+`figures/my_prefixfig2_originalname.png`
+====
+
+
+To create a figure submission package, use the following command:
 
 [source,bash]
 ----
 metanorma-tools extract-images document.presentation.xml \
-  --iso-drg \
   --zip \
   --output-dir submission-figures
 ----
 
-==== Force specific format
+[example]
+====
+`submission-figures.zip`
+====
 
-[source,bash]
-----
-metanorma-tools extract-images document.presentation.xml \
-  --format png \
-  --output-dir png-figures
-----
-
-== Implementation details
-
-=== Core components
-
-The figure extractor uses:
-
-`FigureExtractor`::
-Main extraction engine that processes XML and extracts figures
-
-`Figure`::
-Figure representation class that handles individual figure data
-
-`DocumentMetadata`::
-Metadata extraction using Lutaml::Model for document information
-
-`IsoGraphicFilename`::
-ISO DRG filename generation following compliance guidelines
-
-=== Supported formats
-
-Input formats:
-
-* Metanorma presentation XML files
-* Embedded SVG graphics
-* Base64-encoded images (PNG, JPEG, GIF)
-* Referenced external image files
-
-Output formats:
-
-* SVG (vector graphics, preferred for ISO submission)
-* PNG (raster graphics with transparency)
-* JPEG (raster graphics, compressed)
-* Original format preservation
-
-=== Metadata extraction
-
-The tool extracts document metadata including:
-
-* Document identifier (ISO number, year)
-* Document title and subtitle
-* Document stage and status
-* Figure numbering and captions
-* Cross-reference information
-
-== Dependencies
-
-* `lutaml-model`: For XML parsing and metadata extraction
-* `nokogiri`: For XML processing
-* `rubyzip`: For handling ZIP-based formats and archive creation
-* `thor`: For command-line interface
-
-== Troubleshooting
-
-=== Common issues
-
-==== Missing figures in output
-
-* Verify the input file is a Metanorma presentation XML
-* Check that figures are properly embedded in the XML
-* Ensure sufficient disk space in output directory
-
-==== Filename conflicts
-
-* Use `--prefix` option to avoid naming conflicts
-* Enable `--iso-drg` for standardized naming
-* Check for duplicate figure IDs in source document
-
-==== Format conversion problems
-
-* Verify source image format is supported
-* Check for corrupted embedded images
-* Use `--format` to force specific output format
-
-=== Getting help
-
-For figure extraction issues:
-
-. Verify input file format and structure
-. Check Metanorma documentation for presentation XML requirements
-. Review figure embedding guidelines for your Metanorma flavor
-. Test with sample documents to isolate issues
 
 == See also
 

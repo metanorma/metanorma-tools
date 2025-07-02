@@ -7,29 +7,30 @@ image:https://img.shields.io/github/commits-since/metanorma/metanorma-tools/late
 
 == Purpose
 
-=== General
+Metanorma Tools is a Ruby gem that supports the standards development lifecycle
+for various SDOs (Standards Development Organizations) to facilitate the
+production, packaging and delivery of Metanorma documents.
 
-Metanorma Tools is a Ruby gem that supports the lifecycle of standards editing
-for various flavors to facilitate pre and post-compilation of Metanorma
-documents.
+The post-compilation steps work on Metanorma Presentation XML output
+(`*.presentation.xml`).
 
-The gem provides tools for:
 
-* Figure extraction from Metanorma presentation XML files with ISO DRG
-  compliance
-* Comment management for ISO comment sheets (planned - integrating commenter
-  gem functionality)
-* Pre-production fetch of ISO documents from the OBP into Metanorma documents
-  (planned)
-* GitHub comment management integration for collaborative review processes
-  (planned)
-* Support for various Metanorma flavors and document types
+== Features
 
-=== Currently implemented
+The gem provides workflow tools for:
 
-* link:docs/figure-extraction.adoc[Figure extraction] - Extract embedded
-  figures from Metanorma presentation XML files with ISO DRG compliance
-  features
+ISO (International Organization for Standardization)::
+
+** link:docs/figure-extraction.adoc[ISO figure package]: export images with ISO
+DRG compliant filenames into a package from Metanorma PXML
+
+** Comment management for ISO comment sheets (planned - integrating `commenter` gem functionality)
+
+** GitHub comment management integration for collaborative review processes (planned)
+** Pre-production fetch of ISO documents from the OBP into Metanorma documents (planned)
+
+* [other SDOs when needed...]
+
 
 == Installation
 
@@ -54,6 +55,7 @@ Or install it yourself as:
 $ gem install metanorma-tools
 ----
 
+
 == Usage
 
 See the documentation for individual tools:
@@ -61,16 +63,12 @@ See the documentation for individual tools:
 * link:docs/figure-extraction.adoc[Figure extraction] - Extract embedded
   figures from Metanorma presentation XML files
 
-== Documentation
-
-=== General documentation
-
-* link:docs/figure-extraction.adoc[Figure extraction guide]
-* link:docs/iso-drg-filename-guidance.adoc[ISO DRG filename guidance]
-
-=== Organization-specific workflows
+ISO workflows:
 
 * link:docs/workflows-iso.adoc[ISO workflows and best practices]
+* link:docs/iso-drg-filename-guidance.adoc[ISO DRG filename guidance]
+
+
 
 == ISO standards support
 
@@ -89,8 +87,6 @@ workflows.
 
 * Comment management - Import/export ISO comment sheets with GitHub integration
 * OBP document fetching - Direct integration with ISO Online Browsing Platform
-
-For detailed ISO-specific guidance, see link:docs/workflows-iso.adoc[ISO Workflows].
 
 === ISO command examples
 
@@ -114,9 +110,10 @@ Planned: Fetch ISO documents from OBP:
 
 [source,shell]
 ----
-$ metanorma-tools fetch-iso ISO-80000-2:2019
+$ metanorma-tools obp-import urn:iso:80000:2:2019:en
 ----
 ====
+
 
 == Development notes
 
