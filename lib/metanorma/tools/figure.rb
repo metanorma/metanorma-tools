@@ -75,11 +75,15 @@ module Metanorma
         format_info = FORMATS[@format]
         extension = format_info ? format_info[:ext] : 'unknown'
 
+        # Sanitize autonum for filename (remove dots for ISO DRG compliance)
+        sanitized_autonum = @autonum.gsub('.', '')
+
+        # ISO DRG format: {document_portion}_fig{figureNumber}.{extension}
         if @original_filename && !@original_filename.empty?
           basename = File.basename(@original_filename, File.extname(@original_filename))
-          "#{prefix}_#{@autonum}_#{basename}.#{extension}"
+          "#{prefix}_fig#{sanitized_autonum}_#{basename}.#{extension}"
         else
-          "#{prefix}_#{@autonum}.#{extension}"
+          "#{prefix}_fig#{sanitized_autonum}.#{extension}"
         end
       end
     end

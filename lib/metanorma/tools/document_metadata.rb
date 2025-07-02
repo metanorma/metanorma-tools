@@ -16,10 +16,11 @@ module Metanorma
       def auto_prefix
         case @flavor
         when 'iso'
-          "iso_#{@standard_number}_#{@stage_abbreviation.downcase}_#{@edition}_fig"
+          # ISO DRG format: {StandardNumber}_ed{editionNumber}_{stageCode}
+          "#{@standard_number}_ed#{@edition}_#{@stage_abbreviation.downcase}"
         else
           # For other flavors, use a generic pattern
-          "#{@flavor}_#{@standard_number}_#{@stage_abbreviation.downcase}_#{@edition}_fig"
+          "#{@flavor}_#{@standard_number}_ed#{@edition}_#{@stage_abbreviation.downcase}"
         end
       end
 
