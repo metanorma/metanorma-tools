@@ -86,9 +86,13 @@ RSpec.describe Metanorma::Tools::Cli do
 
   describe 'command line integration' do
     it 'can be executed via command line' do
-      # Test the actual CLI execution
-      result = system("bundle exec metanorma-tools extract-images #{fixture_path} --output-dir #{temp_dir} 2>/dev/null")
-      expect(result).to be true
+      # Test the actual CLI execution using Open3 for cross-platform compatibility
+      require 'open3'
+
+      stdout, stderr, status = Open3.capture3("bundle exec metanorma-tools extract-images #{fixture_path} --output-dir #{temp_dir}")
+
+      expect(status.success?).to be true
+      expect(stdout).to include('Successfully extracted')
     end
 
     it 'shows version information' do
