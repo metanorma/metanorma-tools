@@ -7,9 +7,29 @@ image:https://img.shields.io/github/commits-since/metanorma/metanorma-tools/late
 
 == Purpose
 
-Metanorma Tools is a Ruby gem providing miscellaneous tools to work with Metanorma output.
+=== General
 
-It includes utilities for extracting embedded figures from Metanorma presentation XML files for ISO document submission, with full ISO DRG (Document Review Group) compliance features that ensure the extracted figures meet the necessary standards for ISO submissions.
+Metanorma Tools is a Ruby gem that supports the lifecycle of standards editing
+for various flavors to facilitate pre and post-compilation of Metanorma
+documents.
+
+The gem provides tools for:
+
+* Figure extraction from Metanorma presentation XML files with ISO DRG
+  compliance
+* Comment management for ISO comment sheets (planned - integrating commenter
+  gem functionality)
+* Pre-production fetch of ISO documents from the OBP into Metanorma documents
+  (planned)
+* GitHub comment management integration for collaborative review processes
+  (planned)
+* Support for various Metanorma flavors and document types
+
+=== Currently implemented
+
+* link:docs/figure-extraction.adoc[Figure extraction] - Extract embedded
+  figures from Metanorma presentation XML files with ISO DRG compliance
+  features
 
 == Installation
 
@@ -36,276 +56,87 @@ $ gem install metanorma-tools
 
 == Usage
 
-=== Figure Extraction
+See the documentation for individual tools:
 
-The primary tool is the figure extractor, which extracts embedded figures from Metanorma presentation XML files for ISO document submission.
+* link:docs/figure-extraction.adoc[Figure extraction] - Extract embedded
+  figures from Metanorma presentation XML files
 
-==== Basic usage
+== Documentation
 
-[source,bash]
-----
-# Extract figures with automatic metadata detection
-metanorma-tools extract-images document.presentation.xml
-----
+=== General documentation
 
-==== Advanced usage
+* link:docs/figure-extraction.adoc[Figure extraction guide]
+* link:docs/iso-drg-filename-guidance.adoc[ISO DRG filename guidance]
 
-[source,bash]
-----
-# With custom output directory and prefix
-metanorma-tools extract-images document.presentation.xml --output-dir figures --prefix iso_fig
+=== Organization-specific workflows
 
-# Create ZIP archive
-metanorma-tools extract-images document.presentation.xml --zip
+* link:docs/workflows-iso.adoc[ISO workflows and best practices]
 
-# Verbose mode for debugging
-metanorma-tools extract-images document.presentation.xml --verbose
+== ISO standards support
 
-# Retain original filenames for ISO documents
-metanorma-tools extract-images document.presentation.xml --retain-original-filenames
+=== General
 
-# Combined options
-metanorma-tools extract-images document.presentation.xml --output-dir iso-19135-figures --prefix iso_19135_fdis_fig --zip --verbose --retain-original-filenames
-----
+Metanorma Tools provides comprehensive support for ISO standards editing
+workflows.
 
-==== Command line options
+=== Current ISO features
 
-* `--output-dir` / `-o`: Directory where extracted figures will be saved
-* `--prefix` / `-p`: Custom prefix for generated figure filenames (when not provided, automatically generates from document metadata)
-* `--zip`: Create a ZIP archive of all extracted figures
-* `--verbose` / `-v`: Show detailed progress information and warnings
-* `--retain-original-filenames`: For ISO documents, retain original filenames in generated names (default: disabled)
+* Figure extraction with ISO DRG compliance for filename generation
+* Metadata extraction from ISO presentation XML documents
+* ZIP packaging for ISO figure submission requirements
 
-==== Automatic metadata extraction
+=== Planned ISO integration
 
-The tool automatically extracts document metadata from the XML header:
+* Comment management - Import/export ISO comment sheets with GitHub integration
+* OBP document fetching - Direct integration with ISO Online Browsing Platform
 
-* *Standard Number*: From `<docnumber>` element
-* *Edition*: From `<edition>` element
-* *Stage Code*: From `<stage>` and `<substage>` elements
-* *Generated Prefix*: Format `iso_{standard}_{stage}_{edition}_fig`
+For detailed ISO-specific guidance, see link:docs/workflows-iso.adoc[ISO Workflows].
+
+=== ISO command examples
 
 [example]
 ====
-`iso_19135_fdis_2_fig` for ISO 19135 Edition 2 FDIS stage
-====
+Extract figures with ISO DRG compliance:
 
-== Features
-
-* *Multi-format Support*: Extracts both SVG and PNG figures from Metanorma XML
-* *Smart Naming*: Uses autonum attributes for proper figure numbering
-* *ZIP Archive Creation*: Optional ZIP packaging for easy distribution
-* *ISO DRG Compliance*: Ensures extracted figures meet ISO publishing requirements
-* *Progress Tracking*: Detailed extraction statistics and file size reporting
-* *Error Handling*: Robust error handling with verbose mode for debugging
-
-include::iso-drg-filename-guidance.adoc[leveloffset=+1]
-
-=== File naming compliance (DRG Section 3.2)
-
-The tool implements standardized file naming conventions:
-
-* *Current naming format*: `{prefix}_{autonum}_{original_name}.svg`
-* *Automatic prefix generation*: Creates prefixes like `iso_19135_fdis_2_fig` from document metadata
-* *Figure number integration*: Uses Metanorma autonum attributes for consistent figure numbering
-* *Future DRG format support*: Planned enhancement to support the full DRG naming convention `StandardNumber-partNumber_editionNumber/figureNumber`
-
-[example]
-Current output: `iso_19135_fdis_2_fig_02_register-overview.svg`
-
-Planned DRG format: `19135-1_ed2fig2.svg` (where `-1` is part number)
-
-=== Document metadata extraction compliance
-
-The tool automatically extracts essential document information required for DRG compliance:
-
-* *Standard number extraction*: From `<docnumber>` element
-* *Edition information*: From `<edition>` element
-* *Stage and substage codes*: From document status elements
-* *Automatic prefix generation*: Creates standardized prefixes following ISO conventions
-
-=== Original filename preservation
-
-When the `--retain-original-filenames` option is used with ISO documents, the tool preserves original filenames from the XML document in the generated figure filenames. This feature:
-
-* Only applies to ISO documents (when `metadata.flavor == 'iso'`)
-* Extracts original filenames from the `filename` attribute of image elements
-* Incorporates them into the generated filenames using the pattern: `{iso_drg_pattern}_{original_filename}.{extension}`
-* Maintains traceability between extracted figures and source documents
-
-[example]
-====
-Without `--retain-original-filenames`:
-- `17301_dis_ed3figA1.png`
-- `17301_dis_ed3figC1.png`
-
-With `--retain-original-filenames`:
-- `17301_dis_ed3figA1_a1.png` (includes `a1` from original `images/a1.png`)
-- `17301_dis_ed3figC1_b1.png` (includes `b1` from original `images/b1.png`)
-====
-
-== Output format
-
-=== File naming convention
-
-The tool generates filenames following ISO DRG standards:
-
-* *SVG with original filename*: `{prefix}_{autonum}_{original_name}.svg`
-* *SVG without original filename*: `{prefix}_{autonum}.svg`
-* *PNG from data URI*: `{prefix}_{autonum}.png`
-
-=== Example output
-
-[example]
-====
-[source]
+[source,shell]
 ----
-iso_19135_fdis_fig_02_register-overview.svg
-iso_19135_fdis_fig_03_content-overview.svg
-iso_19135_fdis_fig_04_concept-system-example.svg
-----
-====
-
-== Output summary
-
-After extraction, the tool provides a comprehensive summary:
-
-[example]
-====
-[source]
-----
-============================================================
-EXTRACTION SUMMARY
-============================================================
-Document: ISO 19135 Edition 2 Stage 50.00 (FDIS)
-Auto-generated prefix: iso_19135_fdis_2_fig
-File prefix used: iso_19135_fdis_2_fig
-Total figures extracted: 59
-SVG files: 55
-PNG files: 4
-Total size: 8.14 MB
-Output directory: test_figures_auto
-ZIP archive: Not requested
-
-ISO DRG COMPLIANCE:
-✓ Revisable vector graphics (SVG): Yes
-✓ Proper file naming convention: Yes
-✓ Language-neutral graphics: Yes (extracted from Metanorma)
-✓ Document metadata extraction: Yes
-============================================================
-
-Successfully extracted 59 figures to test_figures_auto
-----
-====
-
-[example]
-====
-[source]
-----
-============================================================
-EXTRACTION SUMMARY
-============================================================
-Total figures extracted: 52
-SVG files: 51
-PNG files: 1
-Total size: 2.45 MB
-Output directory: extracted_figures
-ZIP archive: Created
-
-ISO DRG COMPLIANCE:
-✓ Revisable vector graphics (SVG): Yes
-✓ Proper file naming convention: Yes
-✓ Language-neutral graphics: Yes (extracted from Metanorma)
-============================================================
-----
-====
-
-== Error handling
-
-The tool includes robust error handling for common issues:
-
-* *Missing input file*: Clear error message with exit code 1
-* *Invalid XML*: Parsing errors with detailed messages
-* *Missing figures*: Graceful handling with informative warnings
-* *File system errors*: Proper error reporting and cleanup
-
-== Technical details
-
-=== Debug mode
-
-Use the `--verbose` flag to see detailed processing information:
-
-* Namespace detection
-* Figure element discovery
-* Image processing details
-* Warning messages for skipped content
-
-== Integration with Metanorma workflow
-
-This tool is designed to integrate seamlessly with Metanorma document processing:
-
-. *Generate presentation XML* using Metanorma
-. *Extract figures* using this tool
-. *Package for submission* with optional ZIP creation
-. *Verify compliance* using built-in DRG checks
-
-== Examples
-
-=== ISO 19135 document processing
-
-[source,bash]
-----
-# Generate presentation XML (if not already done)
-metanorma sources/iso-19135-2025/document.adoc
-
-# Extract figures with ZIP packaging
-metanorma-tools extract-images \
-  ~/src/mn/iso-19135/_site/documents/iso-19135-2025/document.presentation.xml \
-  --output-dir iso-19135-figures \
-  --prefix iso_19135_fdis_fig \
-  --zip --verbose
+$ metanorma-tools extract-images iso-document.presentation.xml --prefix "ISO-80000-2"
 ----
 
-== Data model
+Planned: Import ISO comment sheets:
 
-The gem provides several Ruby classes for working with figure extraction:
+[source,shell]
+----
+$ metanorma-tools comment import "ISO DIS comments.docx" --output comments.yaml
+----
 
-=== DocumentMetadata
+Planned: Fetch ISO documents from OBP:
 
-Handles document metadata extraction from Metanorma XML.
-
-`standard_number`:: The ISO standard number
-`edition`:: The document edition
-`stage_code`:: The document stage code
-`stage_abbreviation`:: The stage abbreviation
-
-=== Figure
-
-Represents an extracted figure with format information.
-
-`autonum`:: The figure's autonum from Metanorma
-`content`:: The figure content (SVG or base64 data)
-`format`:: The figure format (svg, datauri_png, etc.)
-`original_filename`:: Original filename if available
-
-=== FigureExtractor
-
-The main extraction engine that processes Metanorma XML files.
-
-=== IsoGraphicFilename
-
-Utility class for generating ISO DRG compliant filenames (future enhancement).
+[source,shell]
+----
+$ metanorma-tools fetch-iso ISO-80000-2:2019
+----
+====
 
 == Development notes
 
 The `spec/fixtures/document-en.dis.presentation.xml` file contains sample
-Metanorma XML for testing purposes from the mn-samples-iso repository.
+Metanorma XML for testing purposes from the
+https://github.com/metanorma/mn-samples-iso[mn-samples-iso repository].
 
+== Dependencies
+
+* `lutaml-model`: For structured data modeling
+* `nokogiri`: For XML parsing
+* `rubyzip`: For ZIP archive creation
+* `thor`: For command-line interface
 
 == Copyright
 
-This gem is developed, maintained and funded by https://www.ribose.com[Ribose Inc.]
+This gem is developed, maintained and funded by
+https://www.ribose.com[Ribose Inc.]
 
 == License
 
-The gem is available as open source under the terms of the https://opensource.org/licenses/BSD-2-Clause[2-Clause BSD License].
+The gem is available as open source under the terms of the
+https://opensource.org/licenses/BSD-2-Clause[2-Clause BSD License].

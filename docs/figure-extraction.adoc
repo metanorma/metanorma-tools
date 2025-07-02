@@ -1,0 +1,181 @@
+= Figure extraction
+
+== Overview
+
+=== General
+
+The figure extraction tool extracts embedded figures from Metanorma
+presentation XML files with ISO DRG compliance features.
+
+The figure extractor processes Metanorma presentation XML files to:
+
+* Extract embedded figures (SVG, PNG, JPEG, etc.)
+* Generate ISO DRG compliant filenames
+* Maintain document metadata and structure
+* Support various Metanorma flavors
+
+== Usage
+
+=== Basic extraction
+
+Extract figures from a Metanorma presentation XML file:
+
+[source,bash]
+----
+metanorma-tools extract-images document.presentation.xml
+----
+
+=== Options
+
+`-o, --output-dir DIR`::
+Output directory for extracted figures (default: current directory)
+
+`--prefix PREFIX`::
+Filename prefix for extracted figures
+
+`--format FORMAT`::
+Force specific output format (svg, png, jpeg)
+
+`--iso-drg`::
+Generate ISO DRG compliant filenames
+
+`--zip`::
+Create ZIP archive of extracted figures
+
+`--retain-original-filenames`::
+Keep original filenames from source document
+
+=== ISO DRG compliance
+
+When using the `--iso-drg` option, filenames are generated according to ISO
+Document Review Group guidelines:
+
+[example]
+====
+[source,bash]
+----
+metanorma-tools extract-images document.presentation.xml --iso-drg
+----
+
+This generates filenames like:
+
+* `ISO_80000-2_2019_fig-1.svg`
+* `ISO_80000-2_2019_fig-2.png`
+====
+
+=== Advanced usage
+
+==== Extract with custom prefix
+
+[source,bash]
+----
+metanorma-tools extract-images document.presentation.xml \
+  --prefix "ISO-80000-2" \
+  --output-dir figures
+----
+
+==== Create submission package
+
+[source,bash]
+----
+metanorma-tools extract-images document.presentation.xml \
+  --iso-drg \
+  --zip \
+  --output-dir submission-figures
+----
+
+==== Force specific format
+
+[source,bash]
+----
+metanorma-tools extract-images document.presentation.xml \
+  --format png \
+  --output-dir png-figures
+----
+
+== Implementation details
+
+=== Core components
+
+The figure extractor uses:
+
+`FigureExtractor`::
+Main extraction engine that processes XML and extracts figures
+
+`Figure`::
+Figure representation class that handles individual figure data
+
+`DocumentMetadata`::
+Metadata extraction using Lutaml::Model for document information
+
+`IsoGraphicFilename`::
+ISO DRG filename generation following compliance guidelines
+
+=== Supported formats
+
+Input formats:
+
+* Metanorma presentation XML files
+* Embedded SVG graphics
+* Base64-encoded images (PNG, JPEG, GIF)
+* Referenced external image files
+
+Output formats:
+
+* SVG (vector graphics, preferred for ISO submission)
+* PNG (raster graphics with transparency)
+* JPEG (raster graphics, compressed)
+* Original format preservation
+
+=== Metadata extraction
+
+The tool extracts document metadata including:
+
+* Document identifier (ISO number, year)
+* Document title and subtitle
+* Document stage and status
+* Figure numbering and captions
+* Cross-reference information
+
+== Dependencies
+
+* `lutaml-model`: For XML parsing and metadata extraction
+* `nokogiri`: For XML processing
+* `rubyzip`: For handling ZIP-based formats and archive creation
+* `thor`: For command-line interface
+
+== Troubleshooting
+
+=== Common issues
+
+==== Missing figures in output
+
+* Verify the input file is a Metanorma presentation XML
+* Check that figures are properly embedded in the XML
+* Ensure sufficient disk space in output directory
+
+==== Filename conflicts
+
+* Use `--prefix` option to avoid naming conflicts
+* Enable `--iso-drg` for standardized naming
+* Check for duplicate figure IDs in source document
+
+==== Format conversion problems
+
+* Verify source image format is supported
+* Check for corrupted embedded images
+* Use `--format` to force specific output format
+
+=== Getting help
+
+For figure extraction issues:
+
+. Verify input file format and structure
+. Check Metanorma documentation for presentation XML requirements
+. Review figure embedding guidelines for your Metanorma flavor
+. Test with sample documents to isolate issues
+
+== See also
+
+* link:iso-drg-filename-guidance.adoc[ISO DRG filename guidance]
+* link:workflows-iso.adoc[ISO workflows and best practices]

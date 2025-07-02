@@ -1,0 +1,367 @@
+= ISO workflows with Metanorma Tools
+
+== Overview
+
+=== General
+
+This document provides guidance on using Metanorma Tools for ISO-specific
+standards editing workflows.
+
+Metanorma Tools supports the complete ISO standards editing lifecycle, from
+document preparation through comment resolution and final publication. The
+tools are designed to work with ISO's specific requirements and processes.
+
+== ISO document lifecycle support
+
+=== Pre-production phase
+
+==== Fetching ISO documents from OBP
+
+Extract existing ISO documents from the Online Browsing Platform (OBP) for
+Metanorma processing:
+
+[source]
+----
+$ metanorma-tools fetch-iso ISO-80000-2:2019
+$ metanorma-tools fetch-iso ISO/IEC-27001:2022 --format metanorma
+----
+
+*Status: Planned functionality*
+
+==== Figure extraction for ISO documents
+
+Extract figures from ISO presentation XML with DRG compliance:
+
+[source]
+----
+$ metanorma-tools extract-images iso-document.presentation.xml \
+  --output-dir figures \
+  --prefix "ISO-80000-2" \
+  --zip
+----
+
+The tool automatically:
+
+* Generates ISO DRG compliant filenames
+* Extracts document metadata from ISO XML structure
+* Supports ISO-specific figure numbering conventions
+* Creates ZIP archives suitable for ISO submission
+
+For detailed usage, see link:figure-extraction.adoc[Figure Extraction Guide].
+
+=== Review and comment phase
+
+==== ISO comment sheet processing
+
+===== Importing ISO comment sheets
+
+Convert ISO comment sheets from DOCX to structured YAML:
+
+[source]
+----
+$ metanorma-tools comment import "ISO 80000-2 DIS comments.docx" \
+  --output comments.yaml \
+  --schema-dir schemas
+----
+
+*Status: Planned functionality (integrating commenter gem)*
+
+===== GitHub integration for ISO comments
+
+Create GitHub issues for collaborative review:
+
+[source]
+----
+$ metanorma-tools comment github-create \
+  --config iso-github-config.yaml \
+  --stage DIS \
+  --milestone "ISO 80000-2 DIS Review" \
+  comments.yaml
+----
+
+Retrieve final observations from closed issues:
+
+[source]
+----
+$ metanorma-tools comment github-retrieve \
+  --config iso-github-config.yaml \
+  comments.yaml
+----
+
+===== Generating final comment sheets
+
+Fill ISO comment sheet templates with resolved comments:
+
+[source]
+----
+$ metanorma-tools comment fill comments.yaml \
+  --output "ISO-80000-2-final-comments.docx" \
+  --template iso-comment-template.docx \
+  --shading
+----
+
+*Status: Planned functionality*
+
+== ISO-specific configuration
+
+=== GitHub configuration for ISO projects
+
+Example configuration for ISO comment management:
+
+[source,yaml]
+----
+github:
+  repository: "iso-tc12/iso-80000-2"
+  milestone:
+    name: "ISO 80000-2 DIS Review"
+  default_labels: ["iso-standard", "dis-review", "tc12"]
+  stage_labels:
+    WD: ["working-draft"]
+    CD: ["committee-draft"]
+    DIS: ["draft-international-standard"]
+    FDIS: ["final-draft-international-standard"]
+    PRF: ["proof"]
+    PUB: ["published"]
+  default_assignee: "iso-secretariat"
+  templates:
+    title: "iso-issue-title.liquid"
+    body: "iso-issue-body.liquid"
+----
+
+=== ISO DRG filename compliance
+
+The figure extraction tool automatically generates ISO Document Review Group
+(DRG) compliant filenames:
+
+* Format: `{document-id}_{figure-number}_{version}.{extension}`
+* Example: `ISO-80000-2_fig-01_v1.svg`
+* Supports both working drafts and published standards
+* Handles multi-part standards: `ISO-80000-2-1_fig-01_v1.svg`
+
+For detailed guidance, see
+link:iso-drg-filename-guidance.adoc[ISO DRG Filename Guidance].
+
+== ISO comment ID conventions
+
+=== Member body identifiers
+
+Common ISO member body abbreviations:
+
+* `US` - ANSI (American National Standards Institute)
+* `DE` - DIN (Deutsches Institut für Normung)
+* `GB` - BSI (British Standards Institution)
+* `FR` - AFNOR (Association française de normalisation)
+* `JP` - JISC (Japanese Industrial Standards Committee)
+* `**` - ISO Secretariat
+
+=== Comment ID format
+
+ISO comment IDs follow the pattern: `{MB}-{sequence}` or
+`{MB}-{org}-{sequence}`
+
+[example]
+====
+* `US-001` - First comment from ANSI
+* `DE-01-002` - Second comment from organization 01 within DIN
+* `**-001` - First comment from ISO Secretariat
+====
+
+=== Comment types
+
+* `ge` - General comment
+* `te` - Technical comment
+* `ed` - Editorial comment
+
+== ISO workflow examples
+
+=== Complete DIS review workflow
+
+[example]
+====
+. Extract figures from presentation XML:
++
+[source]
+----
+$ metanorma-tools extract-images iso-80000-2.presentation.xml \
+  --output-dir dis-figures --zip
+----
+
+. Import comment sheets from member bodies:
++
+[source]
+----
+$ metanorma-tools comment import "DIS-comments-consolidated.docx" \
+  --output dis-comments.yaml
+----
+
+. Create GitHub issues for collaborative resolution:
++
+[source]
+----
+$ metanorma-tools comment github-create \
+  --config iso-dis-config.yaml \
+  --stage DIS \
+  dis-comments.yaml
+----
+
+. After review process, retrieve final observations:
++
+[source]
+----
+$ metanorma-tools comment github-retrieve \
+  --config iso-dis-config.yaml \
+  dis-comments.yaml
+----
+
+. Generate final comment sheet for ISO submission:
++
+[source]
+----
+$ metanorma-tools comment fill dis-comments.yaml \
+  --output "ISO-80000-2-DIS-final-comments.docx" \
+  --shading
+----
+====
+
+=== Multi-part standard processing
+
+For multi-part ISO standards like ISO 80000:
+
+[example]
+====
+Process each part separately:
+
+[source]
+----
+$ metanorma-tools extract-images iso-80000-1.presentation.xml \
+  --prefix "ISO-80000-1" --output-dir part1-figures
+
+$ metanorma-tools extract-images iso-80000-2.presentation.xml \
+  --prefix "ISO-80000-2" --output-dir part2-figures
+----
+
+Consolidate comments across parts:
+
+[source]
+----
+$ metanorma-tools comment import "ISO-80000-all-parts-comments.docx" \
+  --output consolidated-comments.yaml
+----
+====
+
+== ISO submission requirements
+
+=== Figure package requirements
+
+When submitting figures to ISO:
+
+. Use ISO DRG compliant filenames (automatically generated)
+. Include both SVG (preferred) and PNG formats
+. Package in ZIP archive with metadata
+. Include `metadata.json` with document information
+
+=== Comment sheet requirements
+
+Final comment sheets must:
+
+. Include all member body comments
+. Provide secretariat observations for each comment
+. Use status-based shading (accepted/rejected/noted)
+. Follow ISO comment sheet template format
+
+== Integration with ISO tools
+
+=== ISO authoring tools
+
+Metanorma Tools integrates with:
+
+* Metanorma: Primary authoring environment
+* ISO DRG Portal: Figure submission system
+* ISO Commenting System: Official comment collection
+* GitHub: Collaborative review platform
+
+=== Export formats
+
+Support for ISO-required formats:
+
+* DOCX: Comment sheets, final documents
+* PDF: Publication-ready output
+* XML: ISO metadata exchange
+* ZIP: Figure packages for submission
+
+== Best practices for ISO projects
+
+=== Project organization
+
+[source]
+----
+iso-project/
+├── source/                    # Metanorma source files
+├── presentation/              # Generated presentation XML
+├── figures/                   # Extracted figures
+│   ├── svg/                  # Vector formats
+│   ├── png/                  # Raster formats
+│   └── figures.zip           # Submission package
+├── comments/                  # Comment management
+│   ├── raw/                  # Original DOCX sheets
+│   ├── comments.yaml         # Structured comments
+│   └── final/                # Resolved comment sheets
+└── config/                    # Tool configurations
+    ├── github-config.yaml
+    └── templates/
+----
+
+=== Version control
+
+* Use semantic versioning for document revisions
+* Tag releases for each ISO stage (WD, CD, DIS, FDIS)
+* Maintain separate branches for different document parts
+* Archive comment resolution history
+
+=== Quality assurance
+
+* Validate all generated filenames against ISO DRG requirements
+* Verify comment sheet completeness before submission
+* Test figure extraction with sample documents
+* Review GitHub integration with dry-run mode
+
+== Troubleshooting ISO-specific issues
+
+=== Common ISO document issues
+
+==== Metadata extraction problems
+
+* Ensure presentation XML includes proper ISO metadata
+* Verify document identifier format matches ISO conventions
+* Check for multi-part standard numbering
+
+==== Figure naming conflicts
+
+* Use `--retain-original-filenames` for legacy documents
+* Verify figure numbering sequence in source document
+* Check for duplicate figure identifiers
+
+==== Comment sheet processing
+
+* Ensure DOCX follows ISO comment template format
+* Verify member body abbreviations are recognized
+* Check comment ID format compliance
+
+=== Getting help
+
+For ISO-specific issues:
+
+. Check ISO DRG documentation for current requirements
+. Verify against ISO commenting template version 2012-03
+. Contact ISO Central Secretariat for submission guidelines
+. Review Metanorma ISO flavor documentation
+
+== Future ISO enhancements
+
+Planned improvements for ISO workflows:
+
+* Direct OBP Integration: Seamless document fetching
+* ISO Portal API: Automated submission workflows
+* Multi-language Support: Handling ISO's official languages
+* Advanced Metadata: Enhanced ISO-specific document properties
+* Validation Tools: Pre-submission compliance checking

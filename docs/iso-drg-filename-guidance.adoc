@@ -1,9 +1,12 @@
 = ISO DRG compliance
 
-== General
+== Overview
+
+=== General
 
 The ISO DRG (Document Review Group) requirements for document processing are
-specified in the "DRG working instructions and directives" (August 2020), 3.1 "Revisable files".
+specified in the "DRG working instructions and directives" (August 2020), 3.1
+"Revisable files".
 
 3.1 provides a quote on their guidelines for submission:
 
@@ -38,8 +41,9 @@ ____
 
 The actual naming convention is as follows.
 
-
 == File naming convention
+
+=== General
 
 The file naming requirements differ by document type.
 
@@ -63,19 +67,27 @@ There are four parts of the full filename pattern:
 
 == Document portion
 
-For Standard, TS, TR, PAS, IWA:
+=== For Standard, TS, TR, PAS, IWA
 
 [source]
 ----
 {StandardNumber}[-{partNumber}][_{stageCode}]_ed{editionNumber}
 ----
 
-Where,
+Where:
 
-* `StandardNumber` is the standard number, e.g. `12345`;
-* `partNumber` is the part number, e.g. `1`;
-* `stageCode` is the stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf` (final stage uses empty code);
-* `editionNumber` is the edition number, e.g. `1`.
+`StandardNumber`::
+The standard number, e.g. `12345`
+
+`partNumber`::
+The part number, e.g. `1`
+
+`stageCode`::
+The stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf`
+(final stage uses empty code)
+
+`editionNumber`::
+The edition number, e.g. `1`
 
 [example]
 ====
@@ -83,127 +95,157 @@ For the first edition of ISO 12345-1, the document portion is
 `12345-1_ed1`.
 ====
 
-NOTE: TR/TS do not use the codes "FDIS" etc. TODO ask ISO/CS what the proper codes are.
+NOTE: TR/TS do not use the codes "FDIS" etc. TODO ask ISO/CS what the proper
+codes are.
 
 NOTE: The development stage is also provided.
 
-
-For Amendments / Corrigenda:
+=== For Amendments / Corrigenda
 
 [source]
 ----
 {StandardNumber}-{partNumber}[_{stageCode}]_ed{editionNumber}{supplementCode}{supplementNumber}
 ----
 
-Where,
+Where:
 
-* `StandardNumber` is the standard number, e.g. `12345`;
-* `partNumber` is the part number, e.g. `1`;
-* `stageCode` is the stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf` (final stage uses empty code);
-* `editionNumber` is the edition number, e.g. `1`;
-* `supplementCode` is the supplement code. One of `amd`, `cor`;
-* `supplementNumber` is the supplement number, e.g. `1`;
+`StandardNumber`::
+The standard number, e.g. `12345`
+
+`partNumber`::
+The part number, e.g. `1`
+
+`stageCode`::
+The stage code, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf`
+(final stage uses empty code)
+
+`editionNumber`::
+The edition number, e.g. `1`
+
+`supplementCode`::
+The supplement code. One of `amd`, `cor`
+
+`supplementNumber`::
+The supplement number, e.g. `1`
 
 [example]
 ====
 For the second amendment to the first edition of ISO 12345-2, the portion is
 `12345-2_ed1amd2`.
 
-For the second amendment at FDAM to the first edition of ISO 12345-2, the portion is
-`12345-2_ed1amd2_fdis`.
+For the second amendment at FDAM to the first edition of ISO 12345-2, the
+portion is `12345-2_ed1amd2_fdis`.
 ====
 
-NOTE: Amendments do not use the codes "FDIS" etc. TODO ask ISO/CS what the proper codes are.
+NOTE: Amendments do not use the codes "FDIS" etc. TODO ask ISO/CS what the
+proper codes are.
 
 NOTE: The development stage is also provided.
 
-
 == In-document portion
+
+=== General
 
 There are 3 types of in-document types:
 
-. figure and subfigure, where `subfigureAlphabet` is in lower alphabetic characters;
-+
+=== Figure and subfigure
+
+Where `subfigureAlphabet` is in lower alphabetic characters:
+
 [source]
 ----
 fig{figureNumber}[subfigureAlphabet][_{languageCode}]
 ----
-+
+
 [example]
 ====
-"Figure 3" is represented as `fig3`.
-
-Figure 3 in French is represented as `fig3_f`.
-
-"Figure 3 a)" is represented as `fig3a`.
-
-"Figure 3 a)" in French is represented as `fig3a_f`.
-
-"Figure A.2" is represented as `figA2`.
+* "Figure 3" is represented as `fig3`.
+* Figure 3 in French is represented as `fig3_f`.
+* "Figure 3 a)" is represented as `fig3a`.
+* "Figure 3 a)" in French is represented as `fig3a_f`.
+* "Figure A.2" is represented as `figA2`.
 ====
 
-. table, where `tableNumber` is in lower alphabetic characters;
-+
+=== Table
+
+Where `tableNumber` is in lower alphabetic characters:
+
 [source]
 ----
 {figurePortion}Tab{tableNumber}
 ----
-+
+
 [example]
 ====
-"Table 3" is `figTab3`.
-
-Second figure in "Table 1": `figTab1b`. (TODO Is this unnumbered?)
+* "Table 3" is `figTab3`.
+* Second figure in "Table 1": `figTab1b`. (TODO Is this unnumbered?)
 ====
 
-. figure key, representing an individual key as legend to the figure;
-+
+=== Figure key
+
+Representing an individual key as legend to the figure:
+
 [source]
 ----
 {figurePortion}_key{keyNumber}
 ----
-+
+
 [example]
 ====
 Second key in "Figure 1": `fig1_key2`
 ====
 
-. inline image in text, where `textNumber` is in lower alphabetic characters;
-+
+=== Inline image in text
+
+Where `textNumber` is in lower alphabetic characters:
+
 [source]
 ----
 figText{textNumber}
 ----
-+
+
 [example]
 ====
-First graphical element inline with text: `figText1`
-
-Third graphical element inline with text: `figText3`
+* First graphical element inline with text: `figText1`
+* Third graphical element inline with text: `figText3`
 ====
 
-
 NOTE: There is also description of the "Special Layout" with such a pattern:
-"File for table 1 which does not have a figure number" is assigned the file name
-`SL12345-1_ed1figTab1.dwg`. Since I have no idea what the special layout is and
-is likely rare to encounter, it is omitted from this.
-
+"File for table 1 which does not have a figure number" is assigned the file
+name `SL12345-1_ed1figTab1.dwg`. Since I have no idea what the special layout
+is and is likely rare to encounter, it is omitted from this.
 
 == Language portion
 
+=== General
+
 Valid entries are:
 
-`_e`:: English, but it is no longer needed
-`_f`:: French
-`_r`:: Russian
-`_s`:: Spanish
-`_a`:: Arabic
-`_d`:: German
+`_e`::
+English, but it is no longer needed
 
+`_f`::
+French
+
+`_r`::
+Russian
+
+`_s`::
+Spanish
+
+`_a`::
+Arabic
+
+`_d`::
+German
 
 == Original filename preservation
 
-When extracting figures from Metanorma documents, if the original image has a `filename` attribute, the ISO DRG pattern is extended to preserve the original filename:
+=== General
+
+When extracting figures from Metanorma documents, if the original image has a
+`filename` attribute, the ISO DRG pattern is extended to preserve the original
+filename:
 
 [source]
 ----
@@ -211,42 +253,57 @@ When extracting figures from Metanorma documents, if the original image has a `f
 ----
 
 Where:
-* `isoDRGpattern` is the standard ISO DRG filename pattern as described above
-* `originalFilename` is the original filename (without extension) from the `filename` attribute
-* `extension` is the file extension
+
+`isoDRGpattern`::
+The standard ISO DRG filename pattern as described above
+
+`originalFilename`::
+The original filename (without extension) from the `filename` attribute
+
+`extension`::
+The file extension
 
 [example]
+====
 For Figure 1 with original filename "diagram-overview.png":
 `12345-1_ed1fig1_diagram-overview.png`
 
 For Figure A.2 subfigure a with original filename "flowchart.svg":
 `12345-1_ed1figA2a_flowchart.svg`
+====
 
 This extended pattern ensures that:
-1. Files follow ISO DRG naming conventions for proper document management
-2. Original filenames are preserved for reference and traceability
-3. The relationship between extracted figures and source documents is maintained
+
+. Files follow ISO DRG naming conventions for proper document management
+. Original filenames are preserved for reference and traceability
+. The relationship between extracted figures and source documents is maintained
 
 == File extension portion
 
+=== General
+
 ISO/CS (pretty much) only accepts these files.
 
-Vector:
+=== Vector formats
 
 * AutoCAD (`.dwg` or `.dxf`)
 * Illustrator (`.ai`)
 * Vector file type (`.eps` or `.svg`)
-* Word (`.doc`, `.docx`), Excel (`.xls`, `.xlsx`), Powerpoint (`.ppt`, `.pptx`), Visio (`.vsd`, `.vsdx`)
+* Word (`.doc`, `.docx`), Excel (`.xls`, `.xlsx`), Powerpoint (`.ppt`, `.pptx`),
+  Visio (`.vsd`, `.vsdx`)
 * CorelDraw (`.cdr`)
 
-Raster (only useable when no text):
+=== Raster formats
+
+Only useable when no text:
 
 * Portable Network Graphics (`.png`)
 * Tagged Image File Format (`.tif`)
 * Joint Photographic Experts Group (`.jpeg`)
 
-
 == Examples
+
+=== General
 
 The following examples are given by the source document.
 
@@ -324,12 +381,14 @@ The following examples are given by the source document.
 | File for table 1 which does not have a figure
 |===
 
-
 == Data structure
 
-The data structure is designed to be MECE (Mutually Exclusive, Collectively Exhaustive) and covers all ISO DRG filename patterns.
+=== General
 
-=== Core Schema
+The data structure is designed to be MECE (Mutually Exclusive, Collectively
+Exhaustive) and covers all ISO DRG filename patterns.
+
+=== Core schema
 
 [source,yaml]
 ----
@@ -362,26 +421,32 @@ language_code: "f"            # e|f|r|s|a|d (empty for English)
 file_extension: "svg"         # svg|dwg|ai|eps|png|tif|jpeg|etc.
 ----
 
-=== Field Validation Rules
+=== Field validation rules
 
 * `standard_number`: Required integer
 * `part_number`: Optional integer
 * `edition_number`: Required integer
-* `stage_code`: Optional string, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`, `fdis`, `prf`, or empty for final stage
+* `stage_code`: Optional string, one of: `pwi`, `np`, `awi`, `wd`, `cd`, `dis`,
+  `fdis`, `prf`, or empty for final stage
 * `supplement_type`: Optional string, one of: `amd`, `cor`
 * `supplement_number`: Required integer if `supplement_type` is present
-* `content_type`: Required string, one of: `figure`, `table`, `key`, `text`, `special_layout`
-* `figure_number`: Required for `figure`, `table`, `key` content types. Format: number or letter+number (e.g., "3", "A.2")
-* `subfigure`: Optional single lowercase letter (a-z), only valid for `figure` content type
-* `table_number`: Used for `table` content type, typically same as `figure_number`
+* `content_type`: Required string, one of: `figure`, `table`, `key`, `text`,
+  `special_layout`
+* `figure_number`: Required for `figure`, `table`, `key` content types. Format:
+  number or letter+number (e.g., "3", "A.2")
+* `subfigure`: Optional single lowercase letter (a-z), only valid for `figure`
+  content type
+* `table_number`: Used for `table` content type, typically same as
+  `figure_number`
 * `key_number`: Required integer for `key` content type
 * `text_number`: Required integer for `text` content type
 * `language_code`: Optional string, one of: `e`, `f`, `r`, `s`, `a`, `d`
 * `file_extension`: Required string
 
-=== Content Type Examples
+=== Content type examples
 
-.Standard figure
+==== Standard figure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -393,7 +458,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2fig3.svg
 ----
 
-.Figure with subfigure
+==== Figure with subfigure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -406,7 +472,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2fig3a.svg
 ----
 
-.Table figure
+==== Table figure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -419,7 +486,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2figTab1.svg
 ----
 
-.Figure key
+==== Figure key
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -432,7 +500,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2fig1_key2.svg
 ----
 
-.Inline text graphic
+==== Inline text graphic
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -444,7 +513,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2figText1.svg
 ----
 
-.Amendment figure
+==== Amendment figure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -458,7 +528,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2amd1fig3.svg
 ----
 
-.Figure with language
+==== Figure with language
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -471,7 +542,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2fig3_f.svg
 ----
 
-.Annex figure
+==== Annex figure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -483,7 +555,8 @@ file_extension: "svg"
 # Generates: 12345-1_ed2figA2.svg
 ----
 
-.Development stage figure
+==== Development stage figure
+
 [source,yaml]
 ----
 standard_number: 12345
@@ -496,7 +569,8 @@ file_extension: "svg"
 # Generates: 12345-1_fdis_ed2fig3.svg
 ----
 
-.Special layout
+==== Special layout
+
 [source,yaml]
 ----
 standard_number: 12345
