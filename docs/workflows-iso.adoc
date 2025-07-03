@@ -38,6 +38,11 @@ Step 2: Iterate the Metanorma ISO document stage by stage and balloting between 
 
 Step 3: Enjoy the publication!
 
+
+NOTE: The ISO DRG publishes the
+https://www.iso.org/drafting-standards.html[DRG Directives]
+that defines guidelines for the production of drawing files.
+
 == Figure package and extraction
 
 Extract a figure package with compliant ISO DRG filenames:

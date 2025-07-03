@@ -23,6 +23,10 @@ ISO (International Organization for Standardization)::
 
 ** link:docs/figure-extraction.adoc[ISO figure package]: export images with ISO
 DRG compliant filenames into a package from Metanorma PXML
++
+NOTE: The ISO DRG publishes the
+https://www.iso.org/drafting-standards.html[DRG Directives]
+that defines guidelines for the production of drawing files.
 
 ** Comment management for ISO comment sheets (planned - integrating `commenter` gem functionality)
 
