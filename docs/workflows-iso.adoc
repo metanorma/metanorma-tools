@@ -38,3 +38,33 @@ Step 2: Iterate the Metanorma ISO document stage by stage and balloting between 
 
 Step 3: Enjoy the publication!
 
+== Figure package and extraction
+
+Extract a figure package with compliant ISO DRG filenames:
+
+[source,shell]
+----
+$ metanorma-tools extract-images iso-document.presentation.xml --zip
+# From ISO 690 edition 3
+# => 690_ed3.zip (with figures 690_ed3figX.svg)
+# From ISO/FDIS 19135 edition 2
+# => 19135_fdis_ed2.zip (with figures 19135_fdis_ed2figX.svg)
+----
+
+Details at: link:figure-extraction.adoc[Figure extraction]
+
+// Planned: Import ISO comment sheets:
+
+// [source,shell]
+// ----
+// $ metanorma-tools comment import "ISO DIS comments.docx" --output comments.yaml
+// ----
+
+// Planned: Fetch ISO documents from OBP:
+
+// [source,shell]
+// ----
+// $ metanorma-tools obp-import urn:iso:80000:2:2019:en
+// ----
+// ====
+

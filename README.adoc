@@ -7,9 +7,9 @@ image:https://img.shields.io/github/commits-since/metanorma/metanorma-tools/late
 
 == Purpose
 
-Metanorma Tools is a Ruby gem that supports the standards development lifecycle
-for various SDOs (Standards Development Organizations) to facilitate the
-production, packaging and delivery of Metanorma documents.
+Metanorma Tools is a command-line interface that supports the standards
+development lifecycle for various SDOs (Standards Development Organizations) to
+facilitate the production, packaging and delivery of Metanorma documents.
 
 The post-compilation steps work on Metanorma Presentation XML output
 (`*.presentation.xml`).
@@ -68,51 +68,6 @@ ISO workflows:
 * link:docs/workflows-iso.adoc[ISO workflows and best practices]
 * link:docs/iso-drg-filename-guidance.adoc[ISO DRG filename guidance]
 
-
-
-== ISO standards support
-
-=== General
-
-Metanorma Tools provides comprehensive support for ISO standards editing
-workflows.
-
-=== Current ISO features
-
-* Figure extraction with ISO DRG compliance for filename generation
-* Metadata extraction from ISO presentation XML documents
-* ZIP packaging for ISO figure submission requirements
-
-=== Planned ISO integration
-
-* Comment management - Import/export ISO comment sheets with GitHub integration
-* OBP document fetching - Direct integration with ISO Online Browsing Platform
-
-=== ISO command examples
-
-[example]
-====
-Extract figures with ISO DRG compliance:
-
-[source,shell]
-----
-$ metanorma-tools extract-images iso-document.presentation.xml --prefix "ISO-80000-2"
-----
-
-Planned: Import ISO comment sheets:
-
-[source,shell]
-----
-$ metanorma-tools comment import "ISO DIS comments.docx" --output comments.yaml
-----
-
-Planned: Fetch ISO documents from OBP:
-
-[source,shell]
-----
-$ metanorma-tools obp-import urn:iso:80000:2:2019:en
-----
-====
 
 
 == Development notes
